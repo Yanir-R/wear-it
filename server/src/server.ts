@@ -1,6 +1,6 @@
 import fastify from 'fastify';
 import cors from 'fastify-cors';
-import routes from './routes/collectionRoutes';
+import routes from '../src/routes/collectionRoutes';
 
 const PORT = process.env.PORT || 3001;
 
@@ -15,7 +15,7 @@ app.register(cors, {
 routes.forEach((route) => {
   app.route(route);
 });
-``
+``;
 const start = async () => {
   try {
     await app.listen(PORT);
