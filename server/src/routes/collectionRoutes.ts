@@ -1,10 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import * as clothingController from '../controller/clothingController';
-import {
-  Clothing,
-  ClothingItems,
-  ColorTemplets,
-} from '../model/ClothingItemsModel';
+import * as recommendationsController from '../controller/recommendationsController';
+import {Clothing, ClothingItem, ColorTemplets} from '../model/ClothingItemsModel';
 
 export interface GetAllClothingQueryParams {
   page?: number;
@@ -13,6 +10,8 @@ export interface GetAllClothingQueryParams {
   sortOrder?: 'asc' | 'desc';
   type?: Clothing;
   color?: ColorTemplets;
+  recommendation?: any
+  shoeSize?:string
 }
 
 export interface GetAllClothingResponse {
@@ -20,19 +19,19 @@ export interface GetAllClothingResponse {
   currentPage: number;
   pageSize: number;
   totalPages: number;
-  items: ClothingItems[];
+  items: ClothingItem[];
 }
 
-interface Route {
+interface Route<T> {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   url: string;
   handler: (
-    req: FastifyRequest<{ Querystring: GetAllClothingQueryParams }>,
+    req: FastifyRequest<T>,
     reply: FastifyReply<any>,
   ) => Promise<any>;
 }
 
-const routes: Route[] = [
+const routes: Route<GetAllClothingQueryParams>[] = [
   {
     method: 'GET',
     url: '/api/clothes',
@@ -45,19 +44,19 @@ const routes: Route[] = [
   },
   {
     method: 'POST',
-    url: '/api/clothes',
-    handler: clothingController.addNewClothingItems,
+    url: '/api/recommendation',
+    handler: recommendationsController.setRecommendation,
   },
   {
-    method: 'PUT',
-    url: '/api/clothes/:id',
-    handler: clothingController.updateClothingItem,
-  },
-  // {
-  //   method: "DELETE",
-  //   url: "/api/clothes/:id",
-  //   handler: clothingController.deleteClothingItem,
-  // },
+    method: 'GET',
+    url: '/api/recommendation',
+    handler: recommendationsController.getRecommendation,
+},
+{
+  method: 'GET',
+  url: '/api/recommendation/:shoeSize',
+  handler: recommendationsController.getClothingItemsWithRecommendations,
+},
 ];
 
 export default routes;
