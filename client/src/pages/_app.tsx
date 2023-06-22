@@ -6,6 +6,8 @@ import NavBar from '../layout/navBar.component';
 import Head from 'next/head'
 import '../styles/globals.css'
 import PageLayout from '@/layout/PageLayout.component';
+import store from '../store'
+import storeContext from '@/store/storeContext';
 
 export type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode
@@ -19,13 +21,13 @@ export default function App(props: AppPropsWithLayout) {
   const { Component, pageProps } = props
   const getLayout = Component.getLayout ?? ((page) => page)
   const pageComponent = getLayout(<Component {...pageProps} />)
-  
+
   return (
-    <>
+    <storeContext.Provider value={store}>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Head>
       <PageLayout childern={pageComponent} />
-    </>
+    </storeContext.Provider>
   );
 }

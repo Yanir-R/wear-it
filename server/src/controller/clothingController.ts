@@ -9,16 +9,11 @@ import { paginateItems } from '../utils/paginateItems';
 import { sortItems } from '../utils/sortItems';
 import { httpRequest } from '../utils/httpRequests';
 import { getClothingItemsWithRecommendations } from './recommendationsController';
-import boom from 'boom';
 
-export const getAllClothing = async (
-  req: FastifyRequest<{ Querystring: GetAllClothingQueryParams }>) => {
-
+export const getAllClothing = async (req: FastifyRequest<{ Querystring: GetAllClothingQueryParams }>) => {
   try {
     const { pageNumber, pageSize, sortField, sortOrderValue, filters, recommendation, shoeSize } = parseQueryParams(req.query);
-
     let result;
-
     if (recommendation && shoeSize) {
       result = await getClothingItemsWithRecommendations(shoeSize);
     } else {
@@ -38,9 +33,10 @@ export const getAllClothing = async (
 
     return result;
   } catch (err) {
-    throw new Error(err.message)
+    throw new Error(err.message);
   }
 };
+
 
 export const getClothingItemById = async (req, reply) => {
   try {
@@ -52,6 +48,6 @@ export const getClothingItemById = async (req, reply) => {
     }
     return result;
   } catch (err) {
-    throw boom.boomify(err);
+    throw new Error(err.message)
   }
 };

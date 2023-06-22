@@ -9,12 +9,10 @@ export type ClothesDesigners =
 
 export interface ClothingItem {
   id: number;
-  type: Clothing;
+  type: Clothing | string;
   color: ColorTemplets;
   size: number
   brand: ClothesDesigners;
 }
 
-export type ShirtSizes  = 'S' | 'L' |'XL' | 'XXL'
-
-export type ClothingType = 'shirt' | 'pants' | 'shoes';
+export type ShirtSizes = 'S' | 'L' | 'XL' | 'XXL'

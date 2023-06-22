@@ -1,17 +1,17 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import * as clothingController from '../controller/clothingController';
 import * as recommendationsController from '../controller/recommendationsController';
-import {Clothing, ClothingItem, ColorTemplets} from '../model/ClothingItemsModel';
+import { Clothing, ClothingItem, ColorTemplets } from '../model/ClothingItemsModel';
 
 export interface GetAllClothingQueryParams {
   page?: number;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-  type?: Clothing;
+  type?: Clothing | string;
   color?: ColorTemplets;
   recommendation?: any
-  shoeSize?:string
+  shoeSize?: string
 }
 
 export interface GetAllClothingResponse {
@@ -51,12 +51,12 @@ const routes: Route<GetAllClothingQueryParams>[] = [
     method: 'GET',
     url: '/api/recommendation',
     handler: recommendationsController.getRecommendation,
-},
-{
-  method: 'GET',
-  url: '/api/recommendation/:shoeSize',
-  handler: recommendationsController.getClothingItemsWithRecommendations,
-},
+  },
+  {
+    method: 'GET',
+    url: '/api/recommendation/:shoeSize',
+    handler: recommendationsController.getClothingItemsWithRecommendations,
+  },
 ];
 
 export default routes;
