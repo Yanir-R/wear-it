@@ -19,6 +19,6 @@ export interface ClothingItemsResponse {
   currentPage: number;
   items: ClothingItem[];
   pageSize: number;
-  totalItems: number;
+  totalItems: { shoes: number, shirt: number, pants: number };
   totalPages: number;
 }

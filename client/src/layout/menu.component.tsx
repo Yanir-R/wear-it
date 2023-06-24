@@ -30,7 +30,7 @@ const Menu: React.FC<MenuProps> = ({ onLinkClick }) => {
             <LinkBox url="/" onClick={onLinkClick} linkText="Home" />
             <LinkBox url="/clothesList" onClick={onLinkClick} linkText="Clothing Items List" />
             <LinkBox url="/chooseYourClothing" onClick={onLinkClick} linkText="Choose your Clothing" />
-            <LinkBox url="/savedClothingList" onClick={onLinkClick} linkText="Saved Clothing List" />
+            <LinkBox url="/savedClothes" onClick={onLinkClick} linkText="Saved Clothing List" />
         </div>
     )
 }

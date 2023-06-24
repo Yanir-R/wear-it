@@ -1,21 +1,44 @@
 import ClothingStore from '@/store/clothingStore';
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite'
-import { ReactSVG } from 'react-svg'
-import { getSvgPath } from '@/utils/getSvgPath';
-const ClothingItemsList = observer(() => {
+import { ClothingItemComponent } from '@/components/clothingItem';
+
+const ClothingItemsListPage = observer(() => {
   useEffect(() => {
     ClothingStore.fetchItems();
-  }, []);
+  }, [ClothingStore.fetchItems, ClothingStore.selectedItems.length]);
+
 
   return (
     <div>
       {ClothingStore.isFiltered && (
         <button onClick={ClothingStore.resetFilters}>Show All</button>
       )}
-      <button onClick={() => ClothingStore.setFilterType('pants')}>Filter Pants</button>
-      <button onClick={() => ClothingStore.setFilterType('shirt')}>Filter Shirts</button>
-      <button onClick={() => ClothingStore.setFilterType('shoes')}>Filter Shoes</button>
+      <button
+        onClick={() => {
+          ClothingStore.setFilterType('pants');
+        }}
+        style={{ fontWeight: ClothingStore.typeFilter === 'pants' ? 'bold' : 'normal' }}
+      >
+        Filter Pants
+      </button>
+      <button
+        onClick={() => {
+          ClothingStore.setFilterType('shirt');
+        }}
+        style={{ fontWeight: ClothingStore.typeFilter === 'shirt' ? 'bold' : 'normal' }}
+      >
+        Filter Shirts
+      </button>
+      <button
+        onClick={() => {
+          ClothingStore.setFilterType('shoes');
+        }}
+        style={{ fontWeight: ClothingStore.typeFilter === 'shoes' ? 'bold' : 'normal' }}
+      >
+        Filter Shoes
+      </button>
+
 
       <div>
         <input
@@ -28,16 +51,20 @@ const ClothingItemsList = observer(() => {
           type="number"
           placeholder="Filter by size"
           value={ClothingStore.sizeFilter ?? ''}
-          onChange={(e) => ClothingStore.setFilterSize(Number(e.target.value))}
+          onChange={(e) => { ClothingStore.setFilterSize(Number(e.target.value)) }}
         />
       </div>
       {ClothingStore.items?.map(item => (
         <div key={item.id}>
-          <ReactSVG src={getSvgPath(item.type)} />
-          <div>Brand: {item.brand}</div>
-          <div>Size: {item.size}</div>
-          <div>Color: {item.color}</div>
-          <button>Select</button>
+          <ClothingItemComponent item={item} />
+          <button onClick={(() => ClothingStore.selectItem(item.id))}>Select</button>
+        </div>
+      ))}
+      <h1>selectedItems:</h1>
+      {ClothingStore.selectedItems?.map(item => (
+        <div key={item.id}>
+          <ClothingItemComponent item={item} />
+          <button onClick={(() => ClothingStore.selectItem(item.id))}>Select</button>
         </div>
       ))}
       <div>
@@ -49,5 +76,4 @@ const ClothingItemsList = observer(() => {
   );
 });
 
-export default ClothingItemsList;
-
+export default ClothingItemsListPage;

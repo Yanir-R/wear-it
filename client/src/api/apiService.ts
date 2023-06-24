@@ -1,57 +1,46 @@
+import clothingStore from "@/store/clothingStore";
 import { ClothingItemsResponse, ClothingItem } from "@/types";
 import { appendQueryParams } from "@/utils/appendQueryParams";
-import { url } from "inspector";
 
 interface GetAllClothingItemsOptions {
   page?: number;
   limit?: number;
-  sortField?: string;
-  sortOrderValue?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
   filters?: Partial<ClothingItem>;
   recommendation?: boolean;
-  shoeSize?: number;
+  size?: number | string;
+  type?: string | number;
+  color?: string;
 }
-
 
 export const getAllClothingItems = async (options: GetAllClothingItemsOptions = {}): Promise<ClothingItemsResponse> => {
   const url = new URL(`http://localhost:3001/api/clothes`);
+  const { page, limit, sortBy, sortOrder, size, type, color, recommendation } = options;
 
-  const { page, limit, filters } = options;
-  if (page !== undefined) appendQueryParams(url, { page });
-  if (limit !== undefined) appendQueryParams(url, { limit });
-  if (filters) appendQueryParams(url, filters);
+  const queryParams = { page, limit, sortBy, sortOrder, size, type, color, recommendation };
+
+  Object.entries(queryParams).forEach(([key, value]) => {
+    if (value !== undefined) appendQueryParams(url, { [key]: value });
+  });
 
   const response = await fetch(url.toString());
   const data: ClothingItemsResponse = await response.json();
   return data;
 };
 
-export const fetchClothingItem = async (id: string): Promise<ClothingItem> => {
+export const fetchTotalItems = async () => {
+  try {
+    const response = await getAllClothingItems();
+    const totalItems = response.totalItems;
+    clothingStore.setTotalItems(totalItems);
+  } catch (error) {
+    console.error('Error fetching total items:', error);
+  }
+};
+
+export const fetchClothingItem = async (id: number): Promise<ClothingItem> => {
   const response = await fetch(`http://localhost:3001/api/clothes/${id}`);
   const data: ClothingItem = await response.json();
-  return data;
-};
-
-export const setRecommendation = async (recommendation: any) => {
-  const response = await fetch('http://localhost:3001/api/recommendation', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(recommendation),
-  });
-  const data = await response.json();
-  return data;
-};
-
-export const fetchRecommendations = async () => {
-  const response = await fetch('http://localhost:3001/api/recommendation');
-  const data = await response.json();
-  return data;
-};
-
-export const fetchClothingItemsWithRecommendations = async (shoeSize: string) => {
-  const response = await fetch(`http://localhost:3001/api/recommendation/${shoeSize}`);
-  const data = await response.json();
   return data;
 };

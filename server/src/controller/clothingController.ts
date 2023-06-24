@@ -8,26 +8,36 @@ import { httpRequest } from '../utils/httpRequests';
 import { FastifyRequest } from 'fastify';
 import { GetAllClothingQueryParams } from '../routes/collectionRoutes';
 import { findSimilarClothingSize } from '../utils/findSimilarClothingSize';
+import { countItemsByType } from '../utils/countItemByType';
 
 export const getAllClothing = async (req: FastifyRequest<{ Querystring: GetAllClothingQueryParams }>) => {
   try {
-    const { pageNumber, pageSize, sortField, sortOrderValue, filters, recommendation, type, size } = parseQueryParams(req.query);
-    let result;
+    const { pageNumber, pageSize, sortField, sortOrderValue, filters, recommendation, selectedItems, type, size } = parseQueryParams(req.query);
+
     const allItems = await fetchData(apiEndpoints.mockData);
 
-    if (recommendation && type && size) {
-      result = findSimilarClothingSize(allItems, type, parseInt(size));
+    let result;
+
+    if (recommendation && selectedItems) {
+      const recommendedItems = findSimilarClothingSize(allItems, type, parseInt(size as string));
+      result = {
+        currentPage: pageNumber,
+        items: recommendedItems,
+        pageSize,
+        totalItems: countItemsByType(recommendedItems), // Update count based on recommended items
+        totalPages: Math.ceil(recommendedItems.length / pageSize),
+      };
     } else {
-      const filteredItems = filterItems(allItems, filters);
+      const filteredItems = filterItems(allItems, filters, recommendation);
       const sortedItems = sortItems(filteredItems, sortField, sortOrderValue);
       const paginatedItems = paginateItems(sortedItems, pageNumber, pageSize);
 
       result = {
-        totalItems: sortedItems.length,
         currentPage: pageNumber,
-        pageSize,
-        totalPages: Math.ceil(sortedItems.length / pageSize),
         items: paginatedItems,
+        pageSize,
+        totalItems: countItemsByType(allItems),
+        totalPages: Math.ceil(filteredItems.length / pageSize),
       };
     }
 
