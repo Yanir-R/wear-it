@@ -10,6 +10,9 @@ const ClothingItemsList = observer(() => {
 
   return (
     <div>
+      {ClothingStore.isFiltered && (
+        <button onClick={ClothingStore.resetFilters}>Show All</button>
+      )}
       <button onClick={() => ClothingStore.setFilterType('pants')}>Filter Pants</button>
       <button onClick={() => ClothingStore.setFilterType('shirt')}>Filter Shirts</button>
       <button onClick={() => ClothingStore.setFilterType('shoes')}>Filter Shoes</button>

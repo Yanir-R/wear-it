@@ -1,6 +1,3 @@
-import { ClothingItem } from '../model/ClothingItemsModel';
-import { FastifyRequest } from 'fastify';
-import { GetAllClothingQueryParams } from '../routes/collectionRoutes';
 import { apiEndpoints } from '../dataFetcher/apiConfig';
 import { fetchData } from '../utils/fetchData'
 import { parseQueryParams } from '../utils/parseQueryParams'
@@ -8,16 +5,19 @@ import { filterItems } from '../utils/filterItems';
 import { paginateItems } from '../utils/paginateItems';
 import { sortItems } from '../utils/sortItems';
 import { httpRequest } from '../utils/httpRequests';
-import { getClothingItemsWithRecommendations } from './recommendationsController';
+import { FastifyRequest } from 'fastify';
+import { GetAllClothingQueryParams } from '../routes/collectionRoutes';
+import { findSimilarClothingSize } from '../utils/findSimilarClothingSize';
 
 export const getAllClothing = async (req: FastifyRequest<{ Querystring: GetAllClothingQueryParams }>) => {
   try {
-    const { pageNumber, pageSize, sortField, sortOrderValue, filters, recommendation, shoeSize } = parseQueryParams(req.query);
+    const { pageNumber, pageSize, sortField, sortOrderValue, filters, recommendation, type, size } = parseQueryParams(req.query);
     let result;
-    if (recommendation && shoeSize) {
-      result = await getClothingItemsWithRecommendations(shoeSize);
+    const allItems = await fetchData(apiEndpoints.mockData);
+
+    if (recommendation && type && size) {
+      result = findSimilarClothingSize(allItems, type, parseInt(size));
     } else {
-      const allItems: ClothingItem[] = await fetchData(apiEndpoints.mockData);
       const filteredItems = filterItems(allItems, filters);
       const sortedItems = sortItems(filteredItems, sortField, sortOrderValue);
       const paginatedItems = paginateItems(sortedItems, pageNumber, pageSize);
@@ -36,7 +36,6 @@ export const getAllClothing = async (req: FastifyRequest<{ Querystring: GetAllCl
     throw new Error(err.message);
   }
 };
-
 
 export const getClothingItemById = async (req, reply) => {
   try {

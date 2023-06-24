@@ -1,4 +1,4 @@
-export type Clothing = 'shoes' | 'shirt' | 'pants';
+export type Clothing = 'shoes' | 'shirt' | 'pants'
 export type ColorTemplets = 'black' | 'white' | 'red' | 'green' | 'pink';
 export type ClothesDesigners =
   | 'Tommy Hilfiger'
@@ -10,8 +10,8 @@ export type ClothesDesigners =
 export interface ClothingItem {
   id: number;
   type: Clothing | string;
-  color: ColorTemplets;
-  size: number
+  color: ColorTemplets | string;
+  size: number | string;
   brand: ClothesDesigners;
 }
 
