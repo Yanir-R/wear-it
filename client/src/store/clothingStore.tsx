@@ -1,6 +1,7 @@
 import { fetchClothingItem, getAllClothingItems } from "@/api/apiService";
 import { Clothing, ClothingItem } from "@/types";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
+
 class ClothingStore {
   items: ClothingItem[] = [];
   colorFilter = '';
@@ -19,11 +20,13 @@ class ClothingStore {
   }
 
   async fetchItems() {
-    try {
+    runInAction(() => {
       this.isLoading = true;
       this.items = [];
       this.totalItems = { shirt: 0, pants: 0, shoes: 0 };
+    });
 
+    try {
       const response = await getAllClothingItems({
         page: this.currentPage,
         limit: this.pageSize,
@@ -32,16 +35,20 @@ class ClothingStore {
         type: (this.isFiltered ? this.typeFilter : ''),
       });
 
-      if (response) {
-        // Filter out selected items
-        this.items = response.items?.filter((item) => !this.selectedItems.some((selectedItem) => selectedItem.id === item.id));
-        this.totalItems = response.totalItems;
-        this.totalPages = response.totalPages;
-      }
+      runInAction(() => {
+        if (response) {
+          // Filter out selected items
+          this.items = response.items?.filter((item) => !this.selectedItems.some((selectedItem) => selectedItem.id === item.id));
+          this.totalItems = response.totalItems;
+          this.totalPages = response.totalPages;
+        }
+      });
     } catch (error) {
       console.error(error);
     } finally {
-      this.isLoading = false;
+      runInAction(() => {
+        this.isLoading = false;
+      });
     }
   }
 
@@ -67,13 +74,13 @@ class ClothingStore {
 
   setFilterColor = (color: string) => {
     this.colorFilter = color;
-    this.isFiltered = true; // Set filter as active
+    this.isFiltered = true;
     this.fetchItems();
   };
 
   setFilterSize = (size: number) => {
     this.sizeFilter = size;
-    this.isFiltered = true; // Set filter as active
+    this.isFiltered = true;
     this.fetchItems();
 
   };
@@ -82,7 +89,7 @@ class ClothingStore {
   setFilterType = (type: string) => {
     this.typeFilter = type;
     this.currentPage = 1;
-    this.isFiltered = true; // Set filter as active
+    this.isFiltered = true;
     this.fetchItems();
   };
 
@@ -91,14 +98,17 @@ class ClothingStore {
     this.sizeFilter = 0;
     this.typeFilter = '';
     this.currentPage = 1;
-    this.isFiltered = false; // Set filter as inactive
+    this.isFiltered = false;
     this.fetchItems();
   };
 
   handlePageChange = (newPage: number) => {
+
     if (newPage >= 1) {
       this.currentPage = newPage;
-      this.fetchItems();
+      runInAction(() => {
+        this.fetchItems();
+      })
     }
   };
   selectItem = async (itemId: number) => {
@@ -106,15 +116,19 @@ class ClothingStore {
       this.isLoading = true;
       const selectedItem = await fetchClothingItem(itemId);
       if (selectedItem) {
-        this.selectedItems.push(selectedItem);
-        this.typeFilter = selectedItem.type;
-        this.sizeFilter = selectedItem.size;
+        runInAction(() => {
+          this.selectedItems.push(selectedItem);
+          this.typeFilter = selectedItem.type;
+          this.sizeFilter = selectedItem.size;
+        });
         await this.fetchItems();
       }
     } catch (error) {
       console.error(error);
     } finally {
-      this.isLoading = false;
+      runInAction(() => {
+        this.isLoading = false;
+      });
     }
   };
 

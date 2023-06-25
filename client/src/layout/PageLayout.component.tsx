@@ -8,7 +8,7 @@ export default function PageLayout({ childern }: PageLayoutProps) {
     return (
         <div>
             <NavBar />
-            <div>
+            <div className="p-8 h-screen">
                 {childern}
             </div>
         </div>
