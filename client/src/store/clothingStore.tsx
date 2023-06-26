@@ -5,7 +5,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 class ClothingStore {
   items: ClothingItem[] = [];
   colorFilter = '';
-  sizeFilter = 0
+  sizeFilter: number[] = [];
   currentPage = 1;
   typeFilter: Clothing = '';
   isLoading = false;
@@ -14,12 +14,13 @@ class ClothingStore {
   totalItems = { shirt: 0, pants: 0, shoes: 0 }
   isFiltered = false;
   selectedItems: ClothingItem[] = [];
+  filteredItems: ClothingItem[] = [];
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  async fetchItems() {
+  fetchItems = async () => {
     runInAction(() => {
       this.isLoading = true;
       this.items = [];
@@ -31,7 +32,6 @@ class ClothingStore {
         page: this.currentPage,
         limit: this.pageSize,
         color: this.colorFilter,
-        size: this.sizeFilter || undefined,
         type: (this.isFiltered ? this.typeFilter : ''),
       });
 
@@ -39,6 +39,15 @@ class ClothingStore {
         if (response) {
           // Filter out selected items
           this.items = response.items?.filter((item) => !this.selectedItems.some((selectedItem) => selectedItem.id === item.id));
+
+          // Apply size filter if it is set
+          if (this.sizeFilter.length > 0) {
+            this.items = this.items.filter((item) => {
+              // Check if the item size is included in the filter size array
+              return Array.isArray(item.size) ? item.size.some((size) => this.sizeFilter.includes(size)) : this.sizeFilter.includes(item.size);
+            });
+          }
+
           this.totalItems = response.totalItems;
           this.totalPages = response.totalPages;
         }
@@ -52,22 +61,6 @@ class ClothingStore {
     }
   }
 
-  getLastThreeSelectedItems() {
-    const selectedItemsData = this.selectedItems.slice(-3).map(item => ({
-      type: item.type,
-      size: item.size
-    }));
-
-    const types = selectedItemsData.map(item => item.type);
-    const recommendation = types.length === 3 && new Set(types).size === 3;
-
-    return {
-      type: selectedItemsData[0]?.type,
-      size: selectedItemsData[0]?.size,
-      recommendation
-    };
-  }
-
   setTotalItems(items: any) {
     this.totalItems = items;
   }
@@ -75,15 +68,25 @@ class ClothingStore {
   setFilterColor = (color: string) => {
     this.colorFilter = color;
     this.isFiltered = true;
-    this.fetchItems();
   };
 
-  setFilterSize = (size: number) => {
+  setFilterSize = (size: number[]) => {
     this.sizeFilter = size;
     this.isFiltered = true;
-    this.fetchItems();
-
+    this.applyFilters();
   };
+
+  applyFilters() {
+    let filteredItems = this.items;
+
+    if (this.sizeFilter.length > 0) {
+      filteredItems = filteredItems.filter(item =>
+        Array.isArray(item.size) ? item.size.some(size => this.sizeFilter.includes(size)) : this.sizeFilter.includes(item.size)
+      );
+    }
+
+    this.filteredItems = filteredItems;
+  }
 
 
   setFilterType = (type: string) => {
@@ -95,33 +98,58 @@ class ClothingStore {
 
   resetFilters = () => {
     this.colorFilter = '';
-    this.sizeFilter = 0;
+    this.sizeFilter = [];
     this.typeFilter = '';
     this.currentPage = 1;
     this.isFiltered = false;
+
+    if (this.selectedItems.length > 0) {
+      this.selectedItems = [];
+    }
+
     this.fetchItems();
   };
 
+
   handlePageChange = (newPage: number) => {
 
-    if (newPage >= 1) {
+    if (newPage >= 1 && newPage <= this.totalPages) {
       this.currentPage = newPage;
       runInAction(() => {
         this.fetchItems();
       })
     }
   };
+
   selectItem = async (itemId: number) => {
     try {
       this.isLoading = true;
-      const selectedItem = await fetchClothingItem(itemId);
-      if (selectedItem) {
+
+      // Check if the item is already selected
+      const alreadySelected = this.selectedItems.find(item => item.id === itemId);
+
+      if (alreadySelected) {
+        // If the item is already selected, remove it from the list
         runInAction(() => {
-          this.selectedItems.push(selectedItem);
-          this.typeFilter = selectedItem.type;
-          this.sizeFilter = selectedItem.size;
+          this.selectedItems = this.selectedItems.filter(item => item.id !== itemId);
         });
-        await this.fetchItems();
+      } else {
+        // Otherwise, fetch the item and add it to the selectedItems
+        const selectedItem = await fetchClothingItem(itemId);
+        if (selectedItem) {
+          runInAction(() => {
+            this.selectedItems.push(selectedItem);
+            this.typeFilter = selectedItem.type;
+
+            // Set the sizeFilter only if the item is not already selected
+            if (!alreadySelected) {
+              this.sizeFilter = Array.isArray(selectedItem.size)
+                ? selectedItem.size
+                : [selectedItem.size];
+            }
+          });
+          await this.fetchItems();
+        }
       }
     } catch (error) {
       console.error(error);

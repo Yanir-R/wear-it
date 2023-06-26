@@ -1,6 +1,6 @@
-import { ClothingItem } from "../model/ClothingItemsModel";
+import { TransformedClothingData } from "../model/ClothingItemsModel";
 
-export const sortItems = (items: ClothingItem[], sortField: keyof ClothingItem, sortOrderValue: number) => {
+export const sortItems = (items: TransformedClothingData[], sortField: keyof TransformedClothingData, sortOrderValue: number) => {
   return items.sort((a, b) => {
     const valueA = a[sortField];
     const valueB = b[sortField];

@@ -9,7 +9,7 @@ interface GetAllClothingItemsOptions {
   sortOrder?: 'asc' | 'desc';
   filters?: Partial<ClothingItem>;
   recommendation?: boolean;
-  size?: number | string;
+  size?: number | number[];
   type?: string | number;
   color?: string;
 }
@@ -18,7 +18,7 @@ export const getAllClothingItems = async (options: GetAllClothingItemsOptions = 
   const url = new URL(`http://localhost:3001/api/clothes`);
   const { page, limit, sortBy, sortOrder, size, type, color, recommendation } = options;
 
-  const queryParams = { page, limit, sortBy, sortOrder, size, type, color, recommendation };
+  const queryParams = { page, limit, sortBy, sortOrder, size: Array.isArray(size) ? size.join(",") : size, type, color, recommendation };
 
   Object.entries(queryParams).forEach(([key, value]) => {
     if (value !== undefined) appendQueryParams(url, { [key]: value });

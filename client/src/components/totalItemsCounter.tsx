@@ -21,13 +21,12 @@ export const TotalItemCounter = observer(() => {
                                 <th className=" font-bold pr-2 text-left uppercase align-middle bg-transparent border-b  shadow-none text-xxs border-b-solid tracking-none font-mono  border-sky-200 text-cyan-600 opacity-70">Items</th>
                                 <th className=" font-bold  pl-2 text-left uppercase align-middle bg-transparent border-b  shadow-none text-xxs border-b-solid tracking-none font-mono  border-sky-200 text-cyan-600 opacity-70">Count</th>
                                 <th className=" font-bold  pl-2 text-left uppercase align-middle bg-transparent border-b  shadow-none text-xxs border-b-solid tracking-none font-mono  border-sky-200 text-cyan-600 opacity-70">Status</th>
-
                             </tr>
                         </thead>
                         <tbody>
                             {Object.entries(clothingStore.totalItems)?.map(([itemType, count]) => (
                                 <tr key={itemType} >
-                                    <td className="p-2 align-middle bg-transparent border-b border-sky-200 shadow-transparent ">
+                                    <td className="align-middle bg-transparent border-b border-sky-200 shadow-transparent ">
                                         <div className='flex justify-center py-4'>
                                             <ReactSVG src={getSvgPath(itemType as string)} className="inline-flex items-center justify-center mr-4 text-white transition-all duration-200 ease-soft-in-out text-sm rounded-xl" />
                                         </div>

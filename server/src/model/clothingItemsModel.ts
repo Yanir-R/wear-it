@@ -7,12 +7,10 @@ export type ClothesDesigners =
   | 'Lacoste'
   | 'Lee Cooper';
 
-export interface ClothingItem {
+export interface TransformedClothingData {
   id: number;
   type: Clothing | string;
-  color: ColorTemplets | string;
-  size: number | string;
+  color: ColorTemplets
+  size: number | number[] | null;
   brand: ClothesDesigners;
 }
-
-export type ShirtSizes = 'S' | 'L' | 'XL' | 'XXL'

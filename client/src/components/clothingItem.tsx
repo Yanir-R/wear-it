@@ -26,7 +26,7 @@ export const ClothingItemComponent = (props: ClothingItemsProps) => {
                     </div>
                     <div className="flex gap-3 ">
                         <h3 className="font-mono">Size:</h3>
-                        <h3 className="font-mono">{item.size}</h3>
+                        <h3 className="font-mono">{[item.size?.[0], item.size?.[1], item.size?.[2], item.size?.[3]].filter(Boolean).join(', ') || item.size}</h3>
                     </div>
                     <div className="flex gap-0.5">
                         <h3 className="font-mono">Color:</h3>

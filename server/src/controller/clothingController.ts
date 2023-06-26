@@ -9,17 +9,19 @@ import { FastifyRequest } from 'fastify';
 import { GetAllClothingQueryParams } from '../routes/collectionRoutes';
 import { findSimilarClothingSize } from '../utils/findSimilarClothingSize';
 import { countItemsByType } from '../utils/countItemByType';
+import { IncomingData, transformData } from '../utils/transformData';
+import { TransformedClothingData } from '../model/ClothingItemsModel';
+import { sizeMapping } from '../utils/sizeMapping';
 
 export const getAllClothing = async (req: FastifyRequest<{ Querystring: GetAllClothingQueryParams }>) => {
   try {
     const { pageNumber, pageSize, sortField, sortOrderValue, filters, recommendation, selectedItems, type, size } = parseQueryParams(req.query);
 
-    const allItems = await fetchData(apiEndpoints.mockData);
-
+    const allITems: IncomingData[] = await fetchData(apiEndpoints.mockData);
+    const transformDataItems: TransformedClothingData[] = transformData(allITems)
     let result;
-
     if (recommendation && selectedItems) {
-      const recommendedItems = findSimilarClothingSize(allItems, type, parseInt(size as string));
+      const recommendedItems = findSimilarClothingSize(transformDataItems, type, size, sizeMapping);
       result = {
         currentPage: pageNumber,
         items: recommendedItems,
@@ -28,7 +30,7 @@ export const getAllClothing = async (req: FastifyRequest<{ Querystring: GetAllCl
         totalPages: Math.ceil(recommendedItems.length / pageSize),
       };
     } else {
-      const filteredItems = filterItems(allItems, filters, recommendation);
+      const filteredItems = filterItems(transformDataItems, filters, recommendation);
       const sortedItems = sortItems(filteredItems, sortField, sortOrderValue);
       const paginatedItems = paginateItems(sortedItems, pageNumber, pageSize);
 
@@ -36,7 +38,7 @@ export const getAllClothing = async (req: FastifyRequest<{ Querystring: GetAllCl
         currentPage: pageNumber,
         items: paginatedItems,
         pageSize,
-        totalItems: countItemsByType(allItems),
+        totalItems: countItemsByType(transformDataItems),
         totalPages: Math.ceil(filteredItems.length / pageSize),
       };
     }

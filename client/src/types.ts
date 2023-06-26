@@ -11,7 +11,7 @@ export interface ClothingItem {
   id: number;
   type: Clothing;
   color: ColorTemplets;
-  size: number;
+  size: number[];
   brand: ClothesDesigners;
 }
 

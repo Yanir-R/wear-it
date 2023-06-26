@@ -1,5 +1,5 @@
 import ClothingStore from '@/store/clothingStore';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite'
 import { ClothingItemComponent } from '@/components/clothingItem';
 import Link from 'next/link'
@@ -44,30 +44,37 @@ const ClothingItemsListPage = observer(() => {
       </div>
 
 
-      <div className='my-2 flex'>
+      <div className='my-6 flex justify-between'>
         <input
           type="text"
-          className="mr-2 text-sm leading-5.6 block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-2 py-1 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none"
+          className="w-1/3 mr-2 text-sm leading-5.6 block appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-2 py-1 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none"
           placeholder="Filter by color"
           value={ClothingStore.colorFilter}
           onChange={(e) => ClothingStore.setFilterColor(e.target.value)}
         />
         <input
           type="number"
-          className="text-sm leading-5.6 block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-2 py-1 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none"
+          className="w-1/3 text-sm leading-5.6 block appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-2 py-1 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none"
           placeholder="Filter by size"
-          value={ClothingStore.sizeFilter === 0 ? '' : ClothingStore.sizeFilter}
-          onChange={(e) => { ClothingStore.setFilterSize(Number(e.target.value)) }}
+          value={ClothingStore.sizeFilter.join(',')}
+          onChange={(e) => { ClothingStore.setFilterSize(e.target.value.split(',').map(Number)) }}
         />
+        <div>
+          <button className='ml-2 inline-block px-8  py-2 font-bold text-center uppercase align-middle transition-all bg-transparent border border-solid rounded-lg shadow-none cursor-pointer leading-pro ease-soft-in text-xs hover:scale-102 active:shadow-soft-xs tracking-tight-soft border-purple-200 text-cyan-600 hover:border-cyan-600 hover:bg-transparent hover:text-cyan-600 hover:opacity-75 hover:shadow-none active:bg-fuchsia-500 active:text-white active:hover:bg-transparent active:hover:text-fuchsia-500'
+            onClick={() => { ClothingStore.fetchItems(); }}>
+            Search
+          </button>
+        </div>
       </div>
 
       {ClothingStore.items?.map(item => (
         <div key={item.id} className='mb-4 border rounded-lg  border-pink-400'>
           <ClothingItemComponent item={item} />
           <div className="flex items-center justify-center mt-2 mb-2">
-            <button className='inline-block px-8 py-2 my-4 font-bold text-center uppercase align-middle transition-all bg-transparent border border-solid rounded-lg shadow-none cursor-pointer leading-pro ease-soft-in text-xs hover:scale-102 active:shadow-soft-xs tracking-tight-soft border-purple-200 text-cyan-600 hover:border-cyan-600 hover:bg-transparent hover:text-cyan-600 hover:opacity-75 hover:shadow-none active:bg-fuchsia-500 active:text-white active:hover:bg-transparent active:hover:text-fuchsia-500"'
+            <button className='inline-block px-8 py-2 my-4 font-bold text-center uppercase align-middle transition-all bg-transparent border border-solid rounded-lg shadow-none cursor-pointer leading-pro ease-soft-in text-xs hover:scale-102 active:shadow-soft-xs tracking-tight-soft border-purple-200 text-cyan-600 hover:border-cyan-600 hover:bg-transparent hover:text-cyan-600 hover:opacity-75 hover:shadow-none active:bg-fuchsia-500 active:text-white active:hover:bg-transparent active:hover:text-fuchsia-500'
               onClick={(() => ClothingStore.selectItem(item.id))}>
-              {!ClothingStore.selectedItems ? 'Remove' : 'Select'}</button>
+              {ClothingStore.selectedItems.find(selectedItem => selectedItem.id === item.id) ? 'Remove' : 'Select'}
+            </button>
           </div>
         </div>
       ))}
@@ -87,9 +94,10 @@ const ClothingItemsListPage = observer(() => {
         <div key={item.id} className=" border border-red-200" >
           <ClothingItemComponent item={item} />
           <div className="flex items-center justify-center mt-2 mb-2">
-            <button className='inline-block  font-bold text-center uppercase align-middle transition-all bg-transparent border border-solid rounded-lg shadow-none cursor-pointer leading-pro ease-soft-in text-xs hover:scale-102 active:shadow-soft-xs tracking-tight-soft border-sky-200 text-cyan-600 hover:border-cyan-600 hover:bg-transparent hover:text-cyan-600 hover:opacity-75 hover:shadow-none active:bg-fuchsia-500 active:text-white active:hover:bg-transparent active:hover:text-fuchsia-500"'
+            <button className='inline-block  font-bold text-center uppercase align-middle transition-all bg-transparent border border-solid rounded-lg shadow-none cursor-pointer leading-pro ease-soft-in text-xs hover:scale-102 active:shadow-soft-xs tracking-tight-soft border-sky-200 text-cyan-600 hover:border-cyan-600 hover:bg-transparent hover:text-cyan-600 hover:opacity-75 hover:shadow-none active:bg-fuchsia-500 active:text-white active:hover:bg-transparent active:hover:text-fuchsia-500'
               onClick={(() => ClothingStore.selectItem(item.id))}>
-              {ClothingStore.selectedItems ? 'Remove' : 'Select'}</button>
+              {ClothingStore.selectedItems.find(selectedItem => selectedItem.id === item.id) ? 'Remove' : 'Select'}
+            </button>
           </div>
         </div>
       ))}

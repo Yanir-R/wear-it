@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import * as clothingController from '../controller/clothingController';
-import { Clothing, ClothingItem, ColorTemplets } from '../model/ClothingItemsModel';
+import { Clothing, TransformedClothingData, ColorTemplets } from '../model/ClothingItemsModel';
 
 export interface GetAllClothingQueryParams {
   page?: number;
@@ -10,8 +10,8 @@ export interface GetAllClothingQueryParams {
   type?: Clothing | string;
   color?: ColorTemplets | string;
   recommendation?: any
-  size?: number | string
-  selectedItems: ClothingItem[]
+  size?: number | number[]
+  selectedItems: TransformedClothingData[]
 }
 interface Route<T> {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';

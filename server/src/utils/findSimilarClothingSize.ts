@@ -1,24 +1,36 @@
-import { ClothingItem } from "../model/ClothingItemsModel";
-import { sizeMapping } from "./sizeMapping";
+import { TransformedClothingData } from "../model/ClothingItemsModel";
+import { SizeMapping } from "./sizeMapping";
 
-function convertSize(size: string | number): number[] {
-    if (typeof size === 'number') {
-        return [size];
-    } else if (typeof size === 'string') {
-        return sizeMapping[size];
-    }
-    throw new Error(`Invalid size: ${size}`);
-}
 
-export function findSimilarClothingSize(allItems: ClothingItem[], selectedType: string, selectedSize: number): ClothingItem[] {
+
+export function findSimilarClothingSize(
+    allItems: TransformedClothingData[],
+    selectedType: string,
+    selectedSize: number | number[] | null,
+    sizeMapping: SizeMapping
+): TransformedClothingData[] {
     const otherTypes = allItems.filter(item => item.type !== selectedType).map(item => item.type);
     const uniqueOtherTypes = [...new Set(otherTypes)];
 
-    let results: ClothingItem[] = [];
+    let results: TransformedClothingData[] = [];
+
     uniqueOtherTypes.forEach(type => {
-        const sizeRange = [selectedSize - 4, selectedSize, selectedSize + 4];
-        const filteredProducts = allItems.filter(item => item.type === type && convertSize(item.size).some(size => sizeRange.includes(size)));
-        console.log("🚀 ~ file: recommendationsController.ts:110 ~ findSimilarSizeProducts ~ filteredProducts:", filteredProducts)
+        const sizeRange = selectedSize instanceof Array ? selectedSize : [selectedSize - 4, selectedSize, selectedSize + 4];
+        const filteredProducts = allItems.filter(item => {
+            if (item.type === type) {
+                let itemSizeRange: number[] = [];
+                if (typeof item.size === 'number') {
+                    itemSizeRange = sizeMapping[item.size.toString()] || [item.size, item.size];
+                } else if (Array.isArray(item.size)) {
+                    item.size.forEach((size) => {
+                        const sizeRange = sizeMapping[size.toString()] || [size, size];
+                        itemSizeRange.push(...sizeRange);
+                    });
+                }
+                return itemSizeRange.some(size => sizeRange.includes(size));
+            }
+            return false;
+        });
         results.push(...filteredProducts);
     });
 
